@@ -2,7 +2,7 @@
 
 #include "opencv2/opencv.hpp"
 
-
+//bool evaluate_pose(cv::Rect face, cv
 int main(int argc, char** argv) {
   cv::VideoCapture cap;
   cv::CascadeClassifier frontal_face_cascade;
@@ -83,10 +83,13 @@ int main(int argc, char** argv) {
 			
       cv::Rect good_eye1;
       cv::Rect good_eye2;
+      cv::Rect good_mouth;
       good_eye1.y = 0;
       good_eye1.height = 0;
       good_eye2.y = 0;
       good_eye2.height = 0;
+      good_mouth.y = 0;
+      good_mouth.height = 0;
 			
       int best_eye_distance = frame.rows;
 
@@ -122,12 +125,32 @@ int main(int argc, char** argv) {
       cv::Mat cropped_face_image(gray_frame, cropped_face);
 
       mouth_cascade.detectMultiScale(cropped_face_image, mouth, 1.1, 5, 0, cv::Size(20,20));
-
+      
+      int mouth_position_condition = std::numeric_limits<int>::max();
+      int eye_distance = std::abs(good_eye1.x + good_eye1.width/2 - (good_eye2.x + good_eye2.width/2))/2;
+      
       for(std::vector<cv::Rect>::iterator it1 = mouth.begin(); it1 != mouth.end(); it1++) {
 	it1->x = it1->x + max_face->x;
 	it1->y = it1->y + max_face->y + max;
-	cv::rectangle(frame, *it1, cv::Scalar(255, 0, 0));
+	
+				if(eyes.size() >= 2) {
+					if(std::abs(eye_distance - (it1->x + it1->width/2)) < mouth_position_condition) {
+						mouth_position_condition = std::abs(eye_distance - (it1->x + it1->width/2));
+						good_mouth = *it1;
+					}
+				}
+				else {
+					if(std::abs(max_face->y + max_face->height - (it1->y + it1->height/2)) < mouth_position_condition) {
+						mouth_position_condition = std::abs(max_face->y + max_face->height - (it1->y + it1->height/2));
+						good_mouth = *it1;
+					}
+				}
       }
+      
+      
+      cv::rectangle(frame, good_mouth, cv::Scalar(255, 0, 0));
+      
+//      evaluate_pose(max_face, good_eye1, good_eye2, 
     }
 		
     cv::imshow("Video", frame);
