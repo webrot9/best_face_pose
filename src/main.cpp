@@ -2,7 +2,10 @@
 
 #include "opencv2/opencv.hpp"
 
-//bool evaluate_pose(cv::Rect face, cv
+bool evaluate_pose(const cv::Rect& face, 
+		   const cv::Rect& eye1, const cv::Rect& eye2, 
+		   const cv::Rect& mouth); 
+
 int main(int argc, char** argv) {
   cv::VideoCapture cap;
   cv::CascadeClassifier frontal_face_cascade;
@@ -133,24 +136,26 @@ int main(int argc, char** argv) {
 	it1->x = it1->x + max_face->x;
 	it1->y = it1->y + max_face->y + max;
 	
-				if(eyes.size() >= 2) {
-					if(std::abs(eye_distance - (it1->x + it1->width/2)) < mouth_position_condition) {
-						mouth_position_condition = std::abs(eye_distance - (it1->x + it1->width/2));
-						good_mouth = *it1;
-					}
-				}
-				else {
-					if(std::abs(max_face->y + max_face->height - (it1->y + it1->height/2)) < mouth_position_condition) {
-						mouth_position_condition = std::abs(max_face->y + max_face->height - (it1->y + it1->height/2));
-						good_mouth = *it1;
-					}
-				}
+	if(eyes.size() >= 2) {
+	  if(std::abs(eye_distance - (it1->x + it1->width/2)) < mouth_position_condition) {
+	    mouth_position_condition = std::abs(eye_distance - (it1->x + it1->width/2));
+	    good_mouth = *it1;
+	  }
+	}
+	else {
+	  if(std::abs(max_face->y + max_face->height - (it1->y + it1->height/2)) < mouth_position_condition) {
+	    mouth_position_condition = std::abs(max_face->y + max_face->height - (it1->y + it1->height/2));
+	    good_mouth = *it1;
+	  }
+	}
       }
-      
-      
+            
       cv::rectangle(frame, good_mouth, cv::Scalar(255, 0, 0));
-      
-//      evaluate_pose(max_face, good_eye1, good_eye2, 
+      if(evaluate_pose(*max_face, good_eye1, good_eye2, good_mouth)) {
+	cv::Mat face_pose(frame, *max_face);
+	cv::imshow("Best Pose", face_pose); 
+	cv::moveWindow("Best Pose", frame.cols + 100, 0);
+      }
     }
 		
     cv::imshow("Video", frame);
@@ -158,4 +163,36 @@ int main(int argc, char** argv) {
   }
 	
   return 0;
+}
+
+bool evaluate_pose(const cv::Rect& face, 
+		   const cv::Rect& eye1, const cv::Rect& eye2, 
+		   const cv::Rect& mouth) {
+  // Check eyes and mouth existence
+  if(eye1.y == 0 && eye1.height == 0) { return false; }
+  if(eye2.y == 0 && eye2.height == 0) { return false; }
+  if(mouth.y == 0 && mouth.height == 0) { return false; }
+
+  // Check eyes line is almost horizontal
+  int horiz_eye_thresh = 0.05f * face.height;
+  if(std::abs(eye1.y + eye1.height/2 - (eye2.y + eye2.height/2)) > horiz_eye_thresh) { return false; } 
+
+  // Check mouth position with respect to the eyes, the angles of the segments unifying the center 
+  // of the mouth with the center of each eye have to be similar
+  float angle_thresh = 1.5f * M_PI / 180.0f;
+  float ideal_eye_angle = 70.0f * M_PI / 180.0f;
+  cv::Vec2i eye1_eye2_vec(eye2.x + eye2.width/2 - (eye1.x + eye1.width/2),
+			  eye2.y + eye2.height/2 - (eye1.y + eye1.height/2));
+  cv::Vec2i eye2_eye1_vec(eye1.x + eye1.width/2 - (eye2.x + eye2.width/2),
+			  eye1.y + eye1.height/2 - (eye2.y + eye2.height/2));
+  cv::Vec2i eye1_mouth_vec(mouth.x + mouth.width/2 - (eye1.x + eye1.width/2),
+			   mouth.y + mouth.height/2 - (eye1.y + eye1.height/2));
+  cv::Vec2i eye2_mouth_vec(mouth.x + mouth.width/2 - (eye2.x + eye2.width/2),
+			   mouth.y + mouth.height/2 - (eye2.y + eye2.height/2));
+  float eye1_mouth_angle = acosf(eye1_eye2_vec.dot(eye1_mouth_vec) / (norm(eye1_eye2_vec) * norm(eye1_mouth_vec)));
+  float eye2_mouth_angle = acosf(eye2_eye1_vec.dot(eye2_mouth_vec) / (norm(eye2_eye1_vec) * norm(eye2_mouth_vec)));
+  if(std::abs(eye1_mouth_angle - ideal_eye_angle) > angle_thresh) { return false; }
+  if(std::abs(eye2_mouth_angle - ideal_eye_angle) > angle_thresh) { return false; }
+
+  return true;
 }
