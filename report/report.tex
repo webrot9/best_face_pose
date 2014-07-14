@@ -50,9 +50,10 @@ Visual evidence of the obtained results is available from \figurename~\ref{fig:f
 The second processing phase consists in the application of some heuristics for the selection of the best pose, in the video, for the detected face. Namely, a pose is considered to be good when the face is frontal with respect to the camera. In order to obtain good poses, we evaluate some metrics between the key points of the face previously detected (eyes and mouth central points). In detail, we consider
 \begin{enumerate}
 \item Eyes vertical distance: since we do not apply rotation correction, we only accept poses in which the face is not rotated and, therefore, the vertical distance between the eyes is below a threshold corresponding to 7\% of face height;
-\item Angles between eyes and mouth: by computing the segment between the two eyes and those between the eyes and the mouth we evaluate the eye angles. In particular, we  (67.5 found empirically)
+\item Angles between eyes and mouth: by computing the segment between the two eyes and those between the eyes and the mouth we evaluate the eye angles. In particular, we compare the two angles in such a way to evaluate their difference with respect to a reference of 67.5°. This value has been found empirically, by measuring the eye angles on a set of different frontal poses in several video streams.
 \end{enumerate}
 \section*{Results}
+Good results \figurename~\ref{fig:best_pose}
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{./best_face_jacopo.png}
@@ -61,6 +62,7 @@ The second processing phase consists in the application of some heuristics for t
 \label{fig:best_pose}
 \end{figure}
 \section*{Conclusions}
+In this project we applied the Viola-Jones algorithm in order to detect faces. In detail, we detected in a hierarchical manner also eyes and mouth and we used this key points in the face to determine some metrics. These metrics have been used as heuristics for the selection of the best poses in several video streams, obtaining good performances.
 
 \begin{thebibliography}{9}
 
