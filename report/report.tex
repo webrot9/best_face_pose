@@ -31,7 +31,7 @@ Our aim is to construct a system which is able to better detect frontal poses of
 \section*{Methodology}
 Our method is based on two fundamental steps: the first one is the face detection, along with the eyes and the mouth, in a video sequence; the second step is the worst pose rejection based on a series of geometric constraints related to the previously extracted facial features.
 \subsection*{Feature Detection}
-As already stated, the first phase of the algorithm is to find, in real time, the face, eyes and mouth inside each frame of a video source stream. This is done exploiting the Viola-Jones method implementation of the OpenCV library\footnote{http://opencv.org/}. More in detail we apply the following process steps:
+As already stated, the first phase of the algorithm is to find, in real time, the face, eyes and mouth inside each frame of a video source stream. This is done exploiting the Viola-Jones method implementation of the OpenCV library\footnote{http://opencv.org/}. More in detail we apply the following processing steps:
 \begin{enumerate}
 \item Open a video stream and analyze each single frame
 \item Face detection
