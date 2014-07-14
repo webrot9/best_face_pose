@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
 			
       cv::rectangle(frame, good_eye1, cv::Scalar(0, 0, 255));
       cv::rectangle(frame, good_eye2, cv::Scalar(0, 0, 255));
-			
+      
       // Remove eyes from face image to reduce the area where to search for the mouth
       cv::Rect cropped_face = *max_face;
       cropped_face.y = cropped_face.y + max;
@@ -158,13 +158,20 @@ int main(int argc, char** argv) {
       }
             
       // Evaluate if the current pose is good
-      cv::rectangle(frame, good_mouth, cv::Scalar(255, 0, 0));      
+      cv::rectangle(frame, good_mouth, cv::Scalar(255, 0, 0));
+      
+			
+  		cv::circle(frame, cv::Point(good_eye1.x + good_eye1.width/2, good_eye1.y + good_eye1.height/2), 3, cv::Scalar(0, 255, 0));
+  		cv::circle(frame, cv::Point(good_eye2.x + good_eye2.width/2, good_eye2.y + good_eye2.height/2), 3, cv::Scalar(0, 255, 0));
+  		cv::circle(frame, cv::Point(good_mouth.x + good_mouth.width/2, good_mouth.y + good_mouth.height/2), 3, cv::Scalar(0, 255, 0));
+  		
       if(evaluate_pose(*max_face, good_eye1, good_eye2, good_mouth)) {
 	cv::Mat face_pose(frame, *max_face);
 	cv::imshow("Best Pose", face_pose); 
 	cv::moveWindow("Best Pose", frame.cols + 100, 0);
       }
     }
+		
 		
     cv::imshow("Video", frame);
     cv::waitKey(5);
@@ -182,13 +189,13 @@ bool evaluate_pose(const cv::Rect& face,
   if(mouth.y == 0 && mouth.height == 0) { return false; }
 
   // Check eyes line is almost horizontal
-  int horiz_eye_thresh = 0.05f * face.height;
+  int horiz_eye_thresh = 0.07f * face.height;
   if(std::abs(eye1.y + eye1.height/2 - (eye2.y + eye2.height/2)) > horiz_eye_thresh) { return false; } 
 
   // Check mouth position with respect to the eyes, the angles of the segments unifying the center 
   // of the mouth with the center of each eye have to be almost equal to 70°
   float angle_thresh = 1.5f * M_PI / 180.0f;
-  float ideal_eye_angle = 70.0f * M_PI / 180.0f;
+  float ideal_eye_angle = 67.5f * M_PI / 180.0f;
   cv::Vec2i eye1_eye2_vec(eye2.x + eye2.width/2 - (eye1.x + eye1.width/2),
 			  eye2.y + eye2.height/2 - (eye1.y + eye1.height/2));
   cv::Vec2i eye2_eye1_vec(eye1.x + eye1.width/2 - (eye2.x + eye2.width/2),
@@ -199,6 +206,7 @@ bool evaluate_pose(const cv::Rect& face,
 			   mouth.y + mouth.height/2 - (eye2.y + eye2.height/2));
   float eye1_mouth_angle = acosf(eye1_eye2_vec.dot(eye1_mouth_vec) / (norm(eye1_eye2_vec) * norm(eye1_mouth_vec)));
   float eye2_mouth_angle = acosf(eye2_eye1_vec.dot(eye2_mouth_vec) / (norm(eye2_eye1_vec) * norm(eye2_mouth_vec)));
+  
   if(std::abs(eye1_mouth_angle - ideal_eye_angle) > angle_thresh) { return false; }
   if(std::abs(eye2_mouth_angle - ideal_eye_angle) > angle_thresh) { return false; }
 
