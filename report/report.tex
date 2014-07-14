@@ -31,19 +31,35 @@ Our aim is to construct a system which is able to better detect frontal poses of
 \section*{Methodology}
 Our method is based on two fundamental steps: the first one is the face detection, along with the eyes and the mouth, in a video sequence; the second step is the worst pose rejection based on a series of geometric constraints related to the previously extracted facial features.
 \subsection*{Feature Detection}
-As already stated, the first phase of the algorithm is to find, in real time, the face, eyes and mouth inside each frame of a video source stream. This is done exploiting the Viola-Jones method implementation of the OpenCV library\footnote{http://opencv.org/}. More in detail we apply the following processing steps:
+As already stated, the first phase of the algorithm is to find, in real time, the face, eyes and mouth inside each frame of a video source stream. This activity is performed by exploiting the Viola-Jones method implementation of the OpenCV library\footnote{http://opencv.org/}. More in detail we apply the following processing steps, in a hierarchical manner:
 \begin{enumerate}
-\item Open a video stream and analyze each single frame
-\item Face detection
-\item Eyes detection
-\item Mouth detection
-\end{enumerate} 
+\item Video stream opening and frame analysis;
+\item Face detection on the whole image, by means of the haar-like cascades both for frontal and profile faces: the face which is selected among the alternatives is the most visible one or, more formally, the face with the biggest area;
+\item Eyes detection on the portion of the image belonging to the detected face: constraints on the distance of the two eyes are added in order to improve the detection results, removing many false positives;
+\item Mouth detection on the sub-portion of image belonging to the detected face and under the eyes;
+\end{enumerate}
+Visual evidence of the obtained results is available from \figurename~\ref{fig:facedetect}, where both a frontal and a profile face are detected.
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{./jacopo_facedetect.png}
+\includegraphics[width=0.424\textwidth]{./rob_facedetect.png}
+\caption{Face detection results. A green rectangle contains the detected face, while the red and the blue rectangles contains, respectively, the eyes and the mouth resulting from the detection phase.}
+\label{fig:facedetect}
+\end{figure}
 \subsection*{Best Pose Selection}
+The second processing phase consists in the application of some heuristics for the selection of the best pose, in the video, for the detected face. Namely, a pose is considered to be good when the face is frontal with respect to the camera. In order to obtain good poses, we evaluate some metrics between the key points of the face previously detected (eyes and mouth central points). In detail, we consider
 \begin{enumerate}
-\item Eyes vertical distance
-\item Similar angle (67.5 found empirically)
+\item Eyes vertical distance: since we do not apply rotation correction, we only accept poses in which the face is not rotated and, therefore, the vertical distance between the eyes is below a threshold corresponding to 7\% of face height;
+\item Angles between eyes and mouth: by computing the segment between the two eyes and those between the eyes and the mouth we evaluate the eye angles. In particular, we  (67.5 found empirically)
 \end{enumerate}
 \section*{Results}
+\begin{figure}
+\centering
+\includegraphics[width=0.9\textwidth]{./best_face_jacopo.png}
+\includegraphics[width=0.9\textwidth]{./best_face_rob.png}
+\caption{Results of the best face pose detection. The top image shows a profile face and the best pose, which is not updated to the new frame. The bottom image, instead, shows that when the pose is good (frontal) the best pose window is updated with the new frame.}
+\label{fig:best_pose}
+\end{figure}
 \section*{Conclusions}
 
 \begin{thebibliography}{9}
