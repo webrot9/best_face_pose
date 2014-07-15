@@ -1,13 +1,18 @@
 \documentclass[10pt,a4paper]{report}
+
 \usepackage[latin1]{inputenc}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
+
 \author{Roberto Capobianco and Jacopo Serafin}
 \title{Report: Best Face Pose Detection}
+
 \begin{document}
+
 \maketitle
+
 \section*{Introduction and Problem Statement}
 Face detection is a particular subset of object-class detection. Differently from object-class detection, where the goal is to find the locations and sizes of all objects in an image that belong to a given class, face-detection algorithms focus on the detection of human faces.
 
@@ -30,6 +35,7 @@ Our aim is to construct a system which is able to better detect frontal poses of
 
 \section*{Methodology}
 Our method is based on two fundamental steps: the first one is the face detection, along with the eyes and the mouth, in a video sequence; the second step is the worst pose rejection based on a series of geometric constraints related to the previously extracted facial features.
+
 \subsection*{Feature Detection}
 As already stated, the first phase of the algorithm is to find, in real time, the face, eyes and mouth inside each frame of a video source stream. This activity is performed by exploiting the Viola-Jones method implementation of the OpenCV library\footnote{http://opencv.org/}. More in detail we apply the following processing steps, in a hierarchical manner:
 \begin{enumerate}
@@ -46,14 +52,16 @@ Visual evidence of the obtained results is available from \figurename~\ref{fig:f
 \caption{Face detection results. A green rectangle contains the detected face, while the red and the blue rectangles contains, respectively, the eyes and the mouth resulting from the detection phase.}
 \label{fig:facedetect}
 \end{figure}
+
 \subsection*{Best Pose Selection}
 The second processing phase consists in the application of some heuristics for the selection of the best pose, in the video, for the detected face. Namely, a pose is considered to be good when the face is frontal with respect to the camera. In order to obtain good poses, we evaluate some metrics between the key points of the face previously detected (eyes and mouth central points). In detail, we consider
 \begin{enumerate}
 \item Eyes vertical distance: since we do not apply rotation correction, we only accept poses in which the face is not rotated and, therefore, the vertical distance between the eyes is below a threshold corresponding to 7\% of face height;
-\item Angles between eyes and mouth: by computing the segment between the two eyes and those between the eyes and the mouth we evaluate the eye angles. In particular, we compare the two angles in such a way to evaluate their difference with respect to a reference of 67.5°. This value has been found empirically, by measuring the eye angles on a set of different frontal poses in several video streams.
+\item Angles between eyes and mouth: by computing the segment between the two eyes and those between the eyes and the mouth we evaluate the eye angles. In particular, we compare the two angles in such a way to evaluate their difference with respect to a reference of 67.5$^\circ$. This value has been found empirically, by measuring the eye angles on a set of different frontal poses in several video streams.
 \end{enumerate}
+
 \section*{Results}
-Good results \figurename~\ref{fig:best_pose}
+During the evaluation phase, our system demonstrated good results in different environment conditions (i.e. light changes) and for different persons in the video. \figurename~\ref{fig:best_pose} shows two cases where a person was in profile with respect to the camera and one that was frontal. While in the profile case the best pose window (the smaller one) is not updated because of a bad pose, the frontal one is correctly selected as a best pose. Thanks to the processing pipeline previously described, the algorithm is able to run in real time making the execution smooth and accurate at the same time.
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{./best_face_jacopo.png}
@@ -61,11 +69,31 @@ Good results \figurename~\ref{fig:best_pose}
 \caption{Results of the best face pose detection. The top image shows a profile face and the best pose, which is not updated to the new frame. The bottom image, instead, shows that when the pose is good (frontal) the best pose window is updated with the new frame.}
 \label{fig:best_pose}
 \end{figure}
+
 \section*{Conclusions}
 In this project we applied the Viola-Jones algorithm in order to detect faces. In detail, we detected in a hierarchical manner also eyes and mouth and we used this key points in the face to determine some metrics. These metrics have been used as heuristics for the selection of the best poses in several video streams, obtaining good performances.
+\pagebreak
+
+\section*{Appendix A}
+\subsection*{Compiling the code}
+In order to compile the code is necessary to have the OpenCV libraries installed on your system. Once everything is installed you can just type the following commands in a terminal:
+\begin{itemize}
+\item git clone http\dots
+\item cd best\_face\_pose
+\item mkdir build
+\item cd build
+\item cmake ..
+\item make
+\end{itemize}
+
+\subsection*{Running the code}
+After the code is compiled, there are two ways to run the code:
+\begin{description}
+  \item[best\_face\_pose path/to/haarcascade\_dir.] If no video file is specified the webcam will be used as input video source showing your best pose selection in live.
+  \item[best\_face\_pose path/to/haarcascade\_dir path/to/video\_filename.] The\\ video\_file\_name will be used as input video source where to search for best poses.
+\end{description}
 
 \begin{thebibliography}{9}
-
 \bibitem{viola2004robust}
 Viola, Paul, and Michael J. Jones. \emph{``Robust real-time face detection."} International journal of computer vision 57.2 (2004): 137-154.
 
@@ -74,6 +102,6 @@ Papageorgiou, Constantine P., Michael Oren, and Tomaso Poggio. \emph{``A general
 
 \bibitem{steerable}
 Freeman, William T., and Edward H. Adelson. \emph{``The design and use of steerable filters."} IEEE Transactions on Pattern analysis and machine intelligence 13.9 (1991): 891-906.
-
 \end{thebibliography}
+
 \end{document}
