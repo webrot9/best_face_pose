@@ -61,7 +61,7 @@ The second processing phase consists in the application of some heuristics for t
 \end{enumerate}
 
 \section*{Results}
-During the evaluation phase, our system demonstrated good results in different environment conditions (i.e. light changes) and for different persons in the video. \figurename~\ref{fig:best_pose} shows two cases where a person was in profile with respect to the camera and one that was frontal. While in the profile case the best pose window (the smaller one) is not updated because of a bad pose, the frontal one is correctly selected as a best pose. Thanks to the processing pipeline previously described, the algorithm is able to run in real time making the execution smooth and accurate at the same time.
+During the evaluation phase, our system demonstrated good results in different environment conditions (i.e. light changes) and for different persons in the video. \figurename~\ref{fig:best_pose} shows two cases of best pose detection: in the first case a person was showing her profile to the camera; in the second case, instead, the person was frontal with respect to the camera. While in the profile case the best pose window (the smaller one) is not updated because of a bad score in the evaluated metrics, the frontal one is correctly selected as a best pose. Thanks to the processing pipeline previously described, the algorithm is able to run in real time making the execution smooth and accurate at the same time.
 \begin{figure}
 \centering
 \includegraphics[width=0.9\textwidth]{./best_face_jacopo.png}
